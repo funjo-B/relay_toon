@@ -192,6 +192,113 @@ function cutChulsooWalk(x,y,w,h,withShadow=false){
   return out;
 }
 
+/* ── 잉크 소품: 썸네일 차별화용 ── */
+function inkGirl(x,y,s){
+  return `<g transform="translate(${x},${y}) scale(${s})">
+    <circle cx="0" cy="-8" r="26" fill="#fff" stroke="${C.ink}" stroke-width="3.5"/>
+    <path d="M-26,-16 Q-28,-40 0,-38 Q28,-40 26,-16 Q29,12 22,28 L15,-6 Q0,-18 -15,-6 L-22,28 Q-29,12 -26,-16 Z" fill="${C.ink}"/>
+    <circle cx="-9" cy="-4" r="2.5" fill="${C.ink}"/><circle cx="9" cy="-4" r="2.5" fill="${C.ink}"/>
+    <path d="M-6,12 Q0,16 6,12" stroke="${C.ink}" stroke-width="2.5" fill="none"/>
+    <path d="M-16,20 L-24,62 L24,62 L16,20 Q0,26 -16,20 Z" fill="#fff" stroke="${C.ink}" stroke-width="3.5"/>
+    <path d="M-12,62 L-13,96 M12,62 L13,96" stroke="${C.ink}" stroke-width="4.5" stroke-linecap="round"/>
+  </g>`;
+}
+function inkChicken(x,y,s,crown=false){
+  return `<g transform="translate(${x},${y}) scale(${s})">
+    <ellipse cx="0" cy="20" rx="46" ry="36" fill="#fff" stroke="${C.ink}" stroke-width="3.5"/>
+    <circle cx="30" cy="-22" r="22" fill="#fff" stroke="${C.ink}" stroke-width="3.5"/>
+    <path d="M50,-26 L68,-19 L50,-10 Z" fill="${C.ink}"/>
+    <path d="M18,-40 q3,-12 10,-3 q4,-11 11,-2 q6,-7 8,3 L18,-38 Z" fill="${C.ink}"/>
+    <circle cx="34" cy="-26" r="3.2" fill="${C.ink}"/>
+    <path d="M-14,8 Q-36,18 -16,34 Q-2,38 4,26" fill="none" stroke="${C.ink}" stroke-width="3"/>
+    <path d="M-10,55 L-10,72 M-17,72 L-3,72 M18,55 L18,72 M11,72 L25,72" stroke="${C.ink}" stroke-width="3.5" stroke-linecap="round"/>
+    ${crown?`<path d="M14,-46 L18,-68 L28,-54 L38,-70 L46,-52 L50,-44 Z" fill="#fff" stroke="${C.ink}" stroke-width="3"/>`:""}
+  </g>`;
+}
+function inkMoon(x,y,r){
+  return `<circle cx="${x}" cy="${y}" r="${r}" fill="#fff" stroke="${C.ink}" stroke-width="3"/>
+  <circle cx="${x-r*0.3}" cy="${y-r*0.15}" r="${r*0.18}" fill="none" stroke="${C.ink}" stroke-width="2"/>
+  <circle cx="${x+r*0.25}" cy="${y+r*0.32}" r="${r*0.12}" fill="none" stroke="${C.ink}" stroke-width="2"/>`;
+}
+function inkBat(x,y,s){
+  return `<path transform="translate(${x},${y}) scale(${s})" d="M0,0 Q-8,-10 -22,-6 Q-14,0 -20,8 Q-8,6 0,12 Q8,6 20,8 Q14,0 22,-6 Q8,-10 0,0 Z" fill="${C.ink}"/>`;
+}
+function inkRocket(x,y,s,rot=-24){
+  return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})">
+    <path d="M0,-46 Q17,-20 14,14 L-14,14 Q-17,-20 0,-46 Z" fill="#fff" stroke="${C.ink}" stroke-width="3.5"/>
+    <circle cx="0" cy="-12" r="8" fill="none" stroke="${C.ink}" stroke-width="3"/>
+    <path d="M-14,0 L-30,24 L-13,16 M14,0 L30,24 L13,16" fill="none" stroke="${C.ink}" stroke-width="3.5" stroke-linejoin="round"/>
+    <path d="M-6,16 Q0,32 6,16 M0,18 L0,42" stroke="${C.ink}" stroke-width="3" fill="none"/>
+  </g>`;
+}
+function inkDice(x,y,s,rot=-14){
+  return `<g transform="translate(${x},${y}) rotate(${rot}) scale(${s})">
+    <rect x="-22" y="-22" width="44" height="44" rx="8" fill="#fff" stroke="${C.ink}" stroke-width="3.5"/>
+    <circle cx="-9" cy="-9" r="4" fill="${C.ink}"/><circle cx="9" cy="-9" r="4" fill="${C.ink}"/>
+    <circle cx="0" cy="0" r="4" fill="${C.ink}"/>
+    <circle cx="-9" cy="9" r="4" fill="${C.ink}"/><circle cx="9" cy="9" r="4" fill="${C.ink}"/>
+  </g>`;
+}
+function inkHeart(x,y,s){
+  return `<path transform="translate(${x},${y}) scale(${s})" d="M0,12 C-3,3 -16,-8 -16,-17 C-16,-26 -5,-28 0,-19 C5,-28 16,-26 16,-17 C16,-8 3,3 0,12 Z" fill="#fff" stroke="${C.ink}" stroke-width="3"/>`;
+}
+
+/* ── 장르별 썸네일 컷 : 한눈에 구분되는 구도 ── */
+function thumbSchool(x,y,w,h){ return cutChulsooWalk(x,y,w,h); }
+function thumbChicken(x,y,w,h){
+  const m=Math.min(w,h);
+  return toonPanel(x,y,w,h)
+  + `<line x1="${x+w*0.1}" y1="${y+h*0.84}" x2="${x+w*0.9}" y2="${y+h*0.84}" stroke="${C.ink}" stroke-width="3"/>`
+  + inkChicken(x+w*0.44, y+h*0.5, m/135, true)
+  + sfx(x+w*0.63, y+h*0.32, "꼬끼오!!", m/11, 7)
+  + sfx(x+w*0.08, y+h*0.3, "치킨왕국", m/13, -5);
+}
+function thumbHorror(x,y,w,h){
+  const m=Math.min(w,h);
+  return toonPanel(x,y,w,h)
+  + `<rect x="${x+7}" y="${y+7}" width="${w-14}" height="${h-14}" rx="5" fill="url(#halftone)"/>`
+  + inkMoon(x+w*0.78, y+h*0.27, m*0.16)
+  + inkBat(x+w*0.28, y+h*0.2, m/115) + inkBat(x+w*0.48, y+h*0.32, m/160)
+  + inkShadow(x+w*0.42, y+h*0.6, m/175)
+  + sfx(x+w*0.08, y+h*0.87, "으스스…", m/12, -4);
+}
+function thumbRomance(x,y,w,h){
+  const m=Math.min(w,h);
+  return toonPanel(x,y,w,h)
+  + inkBoy(x+w*0.32, y+h*0.6, m/215) + inkGirl(x+w*0.63, y+h*0.6, m/215)
+  + inkHeart(x+w*0.47, y+h*0.24, m/85)
+  + sfx(x+w*0.72, y+h*0.34, "두근", m/12, 8);
+}
+function thumbSF(x,y,w,h){
+  const m=Math.min(w,h);
+  return toonPanel(x,y,w,h)
+  + inkRocket(x+w*0.62, y+h*0.42, m/105)
+  + `<circle cx="${x+w*0.2}" cy="${y+h*0.32}" r="${m*0.1}" fill="#fff" stroke="${C.ink}" stroke-width="3"/>
+     <ellipse cx="${x+w*0.2}" cy="${y+h*0.32}" rx="${m*0.18}" ry="${m*0.055}" fill="none" stroke="${C.ink}" stroke-width="2.5"/>`
+  + [[0.13,0.68],[0.34,0.55],[0.82,0.72],[0.72,0.14],[0.45,0.2]].map(([fx,fy])=>`<circle cx="${x+w*fx}" cy="${y+h*fy}" r="2.6" fill="${C.ink}"/>`).join("")
+  + sfx(x+w*0.08, y+h*0.88, "슈우웅—", m/12);
+}
+function thumbRandom(x,y,w,h){
+  const m=Math.min(w,h);
+  return toonPanel(x,y,w,h)
+  + `<line x1="${x+w*0.4}" y1="${y+8}" x2="${x+w*0.6}" y2="${y+h-8}" stroke="${C.ink}" stroke-width="3" stroke-dasharray="10 8"/>`
+  + inkHeart(x+w*0.2, y+h*0.4, m/100)
+  + inkDice(x+w*0.76, y+h*0.55, m/130)
+  + sfx(x+w*0.13, y+h*0.8, "?!", m/8, -8)
+  + sfx(x+w*0.58, y+h*0.24, "장르 룰렛", m/13, 6);
+}
+function thumbDaily(x,y,w,h){
+  const m=Math.min(w,h);
+  return toonPanel(x,y,w,h)
+  + `<g transform="translate(${x+w*0.64},${y+h*0.46}) rotate(42)">
+      <rect x="-8" y="-${m*0.28}" width="16" height="${m*0.46}" fill="#fff" stroke="${C.ink}" stroke-width="3"/>
+      <path d="M-8,${m*0.18} L0,${m*0.32} L8,${m*0.18} Z" fill="#fff" stroke="${C.ink}" stroke-width="3"/>
+      <path d="M-3,${m*0.24} L0,${m*0.32} L3,${m*0.24} Z" fill="${C.ink}"/>
+    </g>`
+  + `<path d="M${x+w*0.14},${y+h*0.74} q${w*0.09},-${h*0.22} ${w*0.26},-${h*0.08}" stroke="${C.ink}" stroke-width="3.5" fill="none" stroke-linecap="round"/>`
+  + sfx(x+w*0.1, y+h*0.3, "오늘의 1컷", m/12);
+}
+
 /* ════════════════ 장면 정의 (30컷) ════════════════ */
 const SCENES = {
 
@@ -236,13 +343,13 @@ const SCENES = {
   ${[440,620,800,980].map(x=>`<circle cx="${x}" cy="480" r="8" fill="${C.acc}"/>`).join("")}
   <circle cx="800" cy="480" r="14" fill="${C.acc}" filter="url(#glow)"/>
   <path d="M800,480 Q930,330 1060,290" stroke="${C.acc2}" stroke-width="4.5" fill="none"/>
-  ${toonPanel(1060,190,220,170,10)}${inkBoy(1140,270,0.55,{face:"calm"})}<text x="1235" y="240" font-size="30">♥</text>${txt(1170,390,"",1)}
+  ${thumbRomance(1060,190,220,170)}
   ${txt(1170,150,"로맨스 세계선",19,C.acc2,700,"middle")}
   <path d="M800,480 Q930,640 1060,680" stroke="${C.warn}" stroke-width="4.5" fill="none"/>
-  ${toonPanel(1060,560,220,170,10)}${inkShadow(1140,650,0.6)}${sfx(1210,620,"!?",26)}
+  ${thumbHorror(1060,560,220,170)}
   ${txt(1170,790,"공포 세계선",19,C.warn,700,"middle")}
   <path d="M620,480 Q500,640 400,690" stroke="#5ca9ff" stroke-width="4.5" fill="none"/>
-  ${toonPanel(290,560,220,170,10)}${inkBoy(370,650,0.55,{arm:"point"})}<circle cx="450" cy="610" r="18" fill="none" stroke="${C.ink}" stroke-width="3"/><circle cx="450" cy="610" r="8" fill="none" stroke="${C.ink}" stroke-width="2"/>
+  ${thumbSF(290,560,220,170)}
   ${txt(400,790,"SF 세계선 (40화 분기)",19,"#5ca9ff",700,"middle")}
   ${card(600,200,240,120,C.card,C.acc,18,2)}${aiTag(625,222)}${txt(720,270,"Story Bible",20,C.txt,800,"middle")}${txt(720,298,"모든 세계선의 설정 기억",14,C.sub,400,"middle")}
   <path d="M720,320 L790,462" stroke="${C.acc}" stroke-width="2.5" stroke-dasharray="7 6"/>
@@ -449,10 +556,7 @@ const SCENES = {
   ${[["121화","@kim",0],["122화","@lee",1],["123화","@park",2],["124화","AI 자동",3],["125화","@choi",4]].map(([ep,by,i])=>{
     const x=300+i*220, cur=i===4;
     return `<circle cx="${x}" cy="470" r="${cur?13:9}" fill="${cur?C.acc:C.acc2}" ${cur?'filter="url(#glow)"':""}/>`
-    + toonPanel(x-85, i%2===0?260:520, 170, 130, 6)
-    + (i%2===0
-        ? inkBoy(x, 330, 0.42, {walk:i%3===0})
-        : (i===3 ? inkShadow(x,590,0.45) : inkBoy(x, 590, 0.42, {face:"shock",arm:"up"})))
+    + [thumbSchool,thumbChicken,thumbRomance,thumbHorror,thumbSF][i](x-85, i%2===0?260:520, 170, 130)
     + txt(x, i%2===0?425:685, ep+" · "+by, 15, cur?C.acc:C.sub, cur?800:400, "middle");
   }).join("")}
   ${txt(1445,485,"∞",46,C.acc,800)}
@@ -528,12 +632,11 @@ const SCENES = {
   ${[["하루 한 컷 이어그리기","매일 1컷 · 전국민 릴레이","참여 1,024명 · D-3",C.acc,190,270,true],
      ["심야 공포 릴레이","밤 12시에만 열리는 방","참여 312명 · 매일 밤",C.warn,830,270,false],
      ["랜덤 장르 챌린지","AI가 매 턴 장르를 뒤섞는 카오스","참여 87명 · 상시",C.acc2,190,560,false],
-     ["기업 콜라보 — 치킨왕","브랜드 캐릭터 릴레이","🏆 상금 500만원 · D-14","#e668a7",830,560,false]].map(([t,d,meta,c,x,y,hot])=>
+     ["기업 콜라보 — 치킨왕","브랜드 캐릭터 릴레이","🏆 상금 500만원 · D-14","#e668a7",830,560,false]].map(([t,d,meta,c,x,y,hot],idx)=>
     card(x,y,580,260,hot?"#171331":C.card,hot?C.acc:C.line,20,hot?3:1.5)
     + (hot?chip(x+430,y+24,"HOT 🔥",true,13):"")
     + txt(x+34,y+65,t,25,C.txt,800)+txt(x+34,y+105,d,17,C.sub)
-    + toonPanel(x+34,y+130,150,100,6)
-    + (x===190&&y===270? inkBoy(x+109,y+185,0.32,{walk:true}) : x===830&&y===270? inkShadow(x+109,y+185,0.35) : inkBoy(x+109,y+185,0.32,{face:"shock",arm:"up"}))
+    + [thumbDaily,thumbHorror,thumbRandom,thumbChicken][idx](x+34,y+130,150,100)
     + txt(x+215,y+165,meta,16,c,700)
     + uiBtn(x+215,y+185,150,46,"참여하기","primary",15)
   ).join("")}
@@ -545,7 +648,7 @@ const SCENES = {
   ${card(190,200,1220,110,C.card,C.acc,18,2)}
   ${aiTag(220,222,"AI 브리핑")}
   ${txt(220,282,"어제까지 줄거리 : 주인공이 치킨 왕국에 도착했습니다. 규칙 : 하루 1컷 · 병맛 유지 · 기존 캐릭터 준수",18,C.sub)}
-  ${toonPanel(190,350,380,280)}${inkBoy(380,490,0.8,{walk:true})}<path d="M300,400 l18,-26 l6,30 l22,-18" stroke="${C.ink}" stroke-width="3.5" fill="none"/>${sfx(270,430,"치킨왕국…!",24)}
+  ${toonPanel(190,350,380,280)}${inkBoy(310,490,0.75,{walk:true})}${inkChicken(480,510,0.55,true)}${sfx(240,420,"치킨왕국…!",24)}
   ${txt(380,660,"어제의 컷 @chicken_lover",15,C.dim,400,"middle")}
   ${card(600,350,380,280,"#171331",C.acc,10,4)}
   <rect x="618" y="368" width="344" height="210" rx="6" fill="${C.paper}" stroke="${C.ink}" stroke-width="3" stroke-dasharray="12 9"/>
@@ -563,8 +666,7 @@ const SCENES = {
   ${[["무한 병맛 고교","127화 · 12명 대기",0],["치킨 왕국 연대기","342화 · 릴레이 중",1],["심야 공포관","66화 · 밤에만 오픈",2]].map(([t,m,i])=>{
     const x=390+i*350;
     return card(x,255,320,250,C.card,C.line,16)
-    + toonPanel(x+18,273,284,140,6)
-    + (i===0? inkBoy(x+160,345,0.42,{walk:true}) : i===1? inkBoy(x+160,345,0.42,{face:"shock",arm:"up"}) : inkShadow(x+160,345,0.45))
+    + [thumbSchool,thumbChicken,thumbHorror][i](x+18,273,284,140)
     + txt(x+24,450,t,19,C.txt,700)+txt(x+24,480,m,14,C.sub)
     + chip(x+220,437,"LIVE",true,12);
   }).join("")}
@@ -618,7 +720,7 @@ const SCENES = {
   }).join("")}
   ${txt(240,650,"📌 대표 작품",20,C.txt,800)}
   ${card(240,670,880,120,C.card,C.line,16)}
-  ${toonPanel(262,688,150,84,6)}${inkBoy(337,732,0.28,{walk:true})}
+  ${thumbSchool(262,688,150,84)}
   ${txt(440,720,"병맛 고등학교",21,C.txt,700)}${txt(440,752,"구독자 892 · 12화 연재 중 · 브랜치 허용",15,C.sub)}
   ${uiBtn(1150,700,180,56,"작품 보기","primary",17)}
 `),
