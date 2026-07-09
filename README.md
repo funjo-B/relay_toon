@@ -2,6 +2,8 @@
 
 > AI가 세계관을 기억하고 관리하며, 여러 사용자가 하나의 작품을 함께 만들어가는 **협업형 웹툰 플랫폼**
 
+**🖥️ 서비스 목업 바로가기 → [funjo-b.github.io/relay_toon/mockup](https://funjo-b.github.io/relay_toon/mockup/)**
+
 기존 웹툰 플랫폼이 작가 중심의 단방향 콘텐츠라면, Relay Toon은 **AI + 사용자 + 커뮤니티**가 함께 하나의 IP를 성장시키는 것을 목표로 한다.
 핵심은 단순한 웹툰 생성이 아니라 **살아있는 세계관(Living Story World)** 을 만드는 것이다.
 
