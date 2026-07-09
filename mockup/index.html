@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Relay Toon — 서비스 목업</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --panel: #181b24;
+    --panel2: #1f2330;
+    --line: #2a2f3e;
+    --text: #e8eaf0;
+    --sub: #9aa1b5;
+    --accent: #7c5cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+    background: var(--bg); color: var(--text);
+    display: flex; height: 100vh; overflow: hidden;
+  }
+
+  /* ───────── 1열: 목차 ───────── */
+  #sidebar {
+    width: 240px; min-width: 240px; height: 100%;
+    background: var(--panel); border-right: 1px solid var(--line);
+    display: flex; flex-direction: column; padding: 20px 0;
+  }
+  #logo {
+    padding: 0 20px 18px; border-bottom: 1px solid var(--line);
+    font-size: 20px; font-weight: 800; letter-spacing: -0.5px;
+  }
+  #logo .ai { color: var(--accent); }
+  #logo small { display:block; font-size: 11px; font-weight: 400; color: var(--sub); margin-top: 4px; }
+  nav { flex: 1; overflow-y: auto; padding: 12px 10px; }
+  .nav-item {
+    display: block; width: 100%; text-align: left;
+    background: none; border: none; color: var(--text);
+    font-size: 14px; padding: 11px 14px; border-radius: 8px;
+    cursor: pointer; margin-bottom: 2px; font-family: inherit;
+  }
+  .nav-item:hover { background: var(--panel2); }
+  .nav-item.active { background: var(--accent); color: #fff; font-weight: 700; }
+  .nav-group-label {
+    font-size: 12px; color: var(--sub); padding: 14px 14px 6px; font-weight: 700;
+  }
+  .nav-sub { padding-left: 12px; }
+  .nav-sub .nav-item { font-size: 13px; color: #c6cbda; }
+  .nav-sub .nav-item::before { content: "· "; color: var(--sub); }
+  .nav-sub .nav-item.active { color: #fff; }
+  .nav-sub .nav-item.active::before { color: #fff; }
+
+  /* ───────── 2열 ───────── */
+  #main { flex: 1; display: flex; flex-direction: column; height: 100%; }
+
+  /* 상단 2/3 : 화면 목업 */
+  #stage {
+    flex: 2; position: relative;
+    background: radial-gradient(ellipse at 50% 30%, #14161f 0%, var(--bg) 70%);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+  #svg-holder {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px 90px;
+  }
+  #svg-holder svg { width: 100%; height: 100%; }
+  .arrow {
+    position: absolute; top: 50%; transform: translateY(-50%);
+    width: 48px; height: 48px; border-radius: 50%;
+    background: rgba(255,255,255,0.06); border: 1px solid var(--line);
+    color: var(--text); font-size: 20px; cursor: pointer; z-index: 5;
+    display: flex; align-items: center; justify-content: center;
+    transition: background .15s;
+  }
+  .arrow:hover { background: var(--accent); border-color: var(--accent); }
+  .arrow:disabled { opacity: 0.25; cursor: default; }
+  .arrow:disabled:hover { background: rgba(255,255,255,0.06); border-color: var(--line); }
+  #prev { left: 20px; }
+  #next { right: 20px; }
+
+  /* 하단 1/3 : 텍스트 설명 */
+  #caption {
+    flex: 1; padding: 22px 60px; overflow-y: auto;
+    background: var(--panel);
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  #cap-head { display: flex; align-items: center; gap: 12px; }
+  #cap-badge {
+    font-size: 11px; font-weight: 700; color: #fff;
+    background: var(--accent); border-radius: 20px; padding: 4px 12px;
+    white-space: nowrap;
+  }
+  #cap-title { font-size: 19px; font-weight: 800; }
+  #cap-desc { font-size: 14px; line-height: 1.75; color: #c6cbda; white-space: pre-line; }
+  #dots { display: flex; gap: 6px; margin-top: auto; padding-top: 10px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--line); cursor: pointer; }
+  .dot.on { background: var(--accent); width: 22px; border-radius: 5px; }
+  #page-num { font-size: 12px; color: var(--sub); margin-left: auto; }
+</style>
+</head>
+<body>
+
+<!-- ───────── 1열: 목차 ───────── -->
+<aside id="sidebar">
+  <div id="logo">Relay<span class="ai">Toon</span><small>AI 협업 릴레이 웹툰 — 서비스 목업</small></div>
+  <nav id="nav"></nav>
+</aside>
+
+<!-- ───────── 2열 ───────── -->
+<main id="main">
+  <section id="stage">
+    <button class="arrow" id="prev">◀</button>
+    <div id="svg-holder"></div>
+    <button class="arrow" id="next">▶</button>
+  </section>
+  <section id="caption">
+    <div id="cap-head">
+      <span id="cap-badge"></span>
+      <span id="cap-title"></span>
+      <span id="page-num"></span>
+    </div>
+    <div id="cap-desc"></div>
+    <div id="dots"></div>
+  </section>
+</main>
+
+<script src="art/scenes.js"></script>
+<script>
+/* ═══════ 콘텐츠 데이터 (그림은 art/scenes.js 의 TOON_SCENES 가 담당) ═══════ */
+const SECTIONS = [
+{
+  id: "intro", label: "소개", badge: "소개",
+  slides: [
+    { title: "Relay Toon — AI 협업 릴레이 웹툰",
+      desc: "AI가 웹툰의 세계관을 기억·관리하고, 여러 명의 사용자가 하나의 작품을 함께 만들어가는 협업형 웹툰 플랫폼입니다.\n누군가 그리면 → AI가 이어주고 → 다음 사람이 잇습니다. 핵심은 끝없이 성장하는 살아있는 세계관(Living Story World)입니다." },
+    { title: "기존 웹툰과 무엇이 다른가",
+      desc: "기존 플랫폼: 작가 1명이 만들고 독자는 보기만 하는 단방향 구조.\nRelay Toon: 모두가 창작자이며, AI 감독이 세계관을 관리하고, 독자도 참여자이자 수익 파트너가 되는 양방향 구조입니다." },
+    { title: "살아있는 세계관 (Living Story World)",
+      desc: "이야기는 끝나지 않습니다. 원작 타임라인에서 로맨스·공포·SF 세계선이 분기하고, AI Story Bible이 모든 세계선의 설정을 기억합니다.\n작품 하나가 계속 성장하는 IP가 됩니다." }
+  ]
+},
+{
+  id: "feat-main", label: "메인 기능 (AI 제작)", badge: "기능 · 메인", group: "기능",
+  slides: [
+    { title: "① 한 줄만 입력하세요",
+      desc: "사용자는 긴 프롬프트를 쓸 필요가 없습니다.\n\"철수가 복도를 걷는다.\" — 이 한 줄이면 충분합니다. 오른쪽 패널의 연출 요소는 AI가 전부 자동 처리합니다." },
+    { title: "② AI가 연출까지 완성",
+      desc: "AI 감독이 컷 구성, 카메라 앵글, 배경, 효과음, 말풍선 위치까지 자동 생성합니다.\n사용자는 결과를 보고 승인 / 수정 요청 / 다시 생성만 선택하면 됩니다." },
+    { title: "③ AI 감독과 대화로 제작",
+      desc: "AI는 단순 생성기가 아니라 '감독'입니다.\n분위기에 맞는 연출을 먼저 제안하고, 다음 참여자가 이어가기 쉽도록 마무리 컷까지 설계합니다. 실시간 미리보기로 바로 확인할 수 있습니다." },
+    { title: "④ 완성 — AI는 모든 것을 기억합니다",
+      desc: "컷이 반영되는 순간 AI Story Bible이 자동 업데이트됩니다.\n등장인물·장소·떡밥·연표가 기록되어, 1000화가 지나도 철수는 같은 철수입니다." }
+  ]
+},
+{
+  id: "feat-solo", label: "1인 작업 (개인 연재)", badge: "기능 · 1인 작업", group: "기능",
+  slides: [
+    { title: "나만의 작품 만들기",
+      desc: "제목과 장르만 고르면 시작됩니다.\n1인 연재를 선택해도 AI 어시스턴트가 세계관 초안 세팅부터 함께합니다. 나중에 협업/릴레이로 전환할 수도 있습니다." },
+    { title: "AI 어시스턴트와 함께 연재",
+      desc: "혼자 그려도 혼자가 아닙니다.\n다음 컷 전개 추천, 대사 제안까지 — 막히는 부분은 AI가 채워주고, 연재 현황(구독자·조회수)도 한눈에 보입니다." },
+    { title: "공개 설정 & 브랜치 허용",
+      desc: "완성된 작품은 원하는 시점에 공개할 수 있습니다.\n브랜치 허용을 켜면 다른 창작자가 내 작품에서 평행세계를 시작할 수 있고, 이때 Story Bible이 자동으로 복사됩니다." }
+  ]
+},
+{
+  id: "feat-collab", label: "협업방 (비공개)", badge: "기능 · 협업방", group: "기능",
+  slides: [
+    { title: "초대 코드로 팀 창작 시작",
+      desc: "친구, 동아리, 팀 프로젝트를 위한 비공개 방입니다.\n초대 코드를 받은 사람만 참여할 수 있습니다." },
+    { title: "역할과 권한 관리",
+      desc: "방장은 멤버별 권한을 정할 수 있습니다.\n작성자는 컷을 그리고, 검수자는 승인하고, 열람자는 감상만 — 팀 규모에 맞게 운영하세요." },
+    { title: "AI 감독과 함께 공동 작업",
+      desc: "여러 명이 동시에 작업해도 AI 감독이 설정 충돌을 잡아줍니다.\n\"철수는 안경 캐릭터입니다\" — 팀원이 실수해도 세계관은 무너지지 않습니다." }
+  ]
+},
+{
+  id: "feat-open", label: "오픈방 (공개 릴레이)", badge: "기능 · 오픈방", group: "기능",
+  slides: [
+    { title: "누구나 참여하는 3컷 릴레이",
+      desc: "공개 릴레이 방은 모두에게 열려 있습니다.\n지난 컷을 보고 내 차례에 이어 그리면 됩니다. 릴레이 규칙은 AI가 자동 검증합니다." },
+    { title: "빈 컷은 AI가 채웁니다",
+      desc: "1컷만 그리고 제출해도 괜찮습니다.\n나머지 컷은 AI가 흐름에 맞게 자동 생성하고, 다음 참여자가 이어가기 좋은 열린 결말로 마무리합니다." },
+    { title: "끝나지 않는 웹툰",
+      desc: "공개 릴레이에는 완결이 없습니다.\n1,847명의 창작자가 거쳐간 타임라인이 계속 이어지고, 참여가 끊긴 자리는 AI가 메웁니다." }
+  ]
+},
+{
+  id: "feat-branch", label: "브랜치 (평행세계)", badge: "기능 · 브랜치", group: "기능",
+  slides: [
+    { title: "원하는 화에서 이야기를 분기",
+      desc: "\"50화의 그 선택, 나라면 다르게 했을 텐데\" — 그 순간에서 새로운 세계선을 만들 수 있습니다.\n원작은 그대로, 나의 평행세계가 시작됩니다." },
+    { title: "Story Bible이 통째로 복사됩니다",
+      desc: "브랜치를 만들면 그 시점까지의 모든 설정 — 캐릭터, 장소, 아이템, 떡밥 — 이 자동으로 복사됩니다.\n처음부터 설정을 다시 쓸 필요가 없습니다." },
+    { title: "세계선 지도 — 독자가 세계선을 고른다",
+      desc: "하나의 원작에서 뻗어나간 여러 세계선을 지도처럼 탐색할 수 있습니다.\n브랜치에서 또 브랜치가 나올 수 있어(A-1), 세계는 무한히 확장됩니다." }
+  ]
+},
+{
+  id: "feat-event", label: "이벤트 모드", badge: "기능 · 이벤트", group: "기능",
+  slides: [
+    { title: "다수 참여형 이벤트",
+      desc: "하루 한 컷 이어그리기, 심야 공포 릴레이, 랜덤 장르 챌린지, 기업 콜라보까지.\n가볍게 참여할 수 있는 이벤트로 커뮤니티가 활성화됩니다." },
+    { title: "이벤트 참여 흐름",
+      desc: "이벤트 방에 입장하면 AI가 규칙과 지금까지의 줄거리를 브리핑합니다.\n어제의 컷을 보고 오늘 내 컷을 이어 그리면 끝입니다." }
+  ]
+},
+{
+  id: "main-screen", label: "메인화면", badge: "메인화면",
+  slides: [
+    { title: "홈 — 지금 살아있는 세계관들",
+      desc: "실시간으로 진행 중인 릴레이(LIVE), 이번 주 인기 브랜치를 한눈에.\n왼쪽 내비게이션으로 인기·브랜치·이벤트·내 작품으로 이동합니다." },
+    { title: "탐색 — 방 검색과 장르 필터",
+      desc: "장르 필터와 검색으로 취향의 세계관을 찾고, 바로 릴레이에 합류할 수 있습니다.\n신규 작품에는 '지금 시작하기 좋아요' 안내가 붙습니다." },
+    { title: "감상 — AI 위키와 함께 읽기",
+      desc: "읽다가 모르는 설정이 나오면 오른쪽 AI 위키를 바로 확인합니다.\n등장인물·떡밥·3줄 요약·연표까지 — 신규 독자도 127화부터 볼 수 있습니다. 감상 중 바로 브랜치 생성도 가능합니다." }
+  ]
+},
+{
+  id: "account", label: "개인계정", badge: "개인계정",
+  slides: [
+    { title: "프로필 — 나의 창작 발자국",
+      desc: "내 작품, 참여한 릴레이, 만든 브랜치, 기여 컷 수가 프로필에 쌓입니다.\n크리에이터 레벨과 팔로워가 창작자로서의 나를 증명합니다." },
+    { title: "기여도와 보상",
+      desc: "참여량, 조회수 기여, 독자 반응, AI 스토리 평가가 합산되어 기여도 점수가 됩니다.\n작품 수익 중 내 몫(기여도 %)이 자동 계산되어 매달 정산됩니다." },
+    { title: "AI 토큰 지갑",
+      desc: "창작 활동으로 토큰을 모으고, AI 생성·고화질·특수 효과 같은 프리미엄 기능에 씁니다.\n창작 → 보상 → AI 기능 → 성장으로 이어지는 선순환 구조입니다." }
+  ]
+},
+{
+  id: "revenue", label: "수익구조", badge: "수익구조",
+  slides: [
+    { title: "수익원 — 광고 · 구독 · 후원 · IP",
+      desc: "4개의 수익원이 플랫폼 수익 풀로 모이고, 창작자 분배와 플랫폼 운영으로 나뉩니다.\n분배 리포트는 투명하게 공개됩니다." },
+    { title: "기여도 기반 자동 분배",
+      desc: "협업 작품의 수익은 한 명이 독차지하지 않습니다.\nAI가 산정한 기여도에 따라 상위 기여자부터 참여자 전원에게 자동 지급됩니다." },
+    { title: "토큰 이코노미 — 창작의 선순환",
+      desc: "창작 참여 → 보상 획득 → AI 기능 사용 → 콘텐츠 성장 → 다시 창작.\n창작자·독자·플랫폼이 함께 성장하는 구조입니다." }
+  ]
+}
+];
+
+/* ═══════════════ 렌더링 로직 ═══════════════ */
+let curSection = 0, curSlide = 0;
+
+const nav = document.getElementById("nav");
+function buildNav() {
+  let html = "";
+  let inGroup = false;
+  SECTIONS.forEach((s, i) => {
+    if (s.group && !inGroup) {
+      html += `<div class="nav-group-label">📂 ${s.group}</div><div class="nav-sub">`;
+      inGroup = true;
+    }
+    if (!s.group && inGroup) { html += `</div>`; inGroup = false; }
+    html += `<button class="nav-item" data-i="${i}">${s.label}</button>`;
+  });
+  if (inGroup) html += `</div>`;
+  nav.innerHTML = html;
+  nav.querySelectorAll(".nav-item").forEach(b => {
+    b.onclick = () => { curSection = +b.dataset.i; curSlide = 0; render(); };
+  });
+}
+
+function render() {
+  const sec = SECTIONS[curSection];
+  const sl = sec.slides[curSlide];
+  document.querySelectorAll(".nav-item").forEach(b =>
+    b.classList.toggle("active", +b.dataset.i === curSection));
+  const cutId = `${sec.id}-${curSlide + 1}`;
+  const scene = window.TOON_SCENES && window.TOON_SCENES[cutId];
+  document.getElementById("svg-holder").innerHTML = scene ? scene() :
+    `<div style="color:#5d6580;font-size:20px">(${cutId} 장면 준비 중)</div>`;
+  document.getElementById("cap-badge").textContent = sec.badge;
+  document.getElementById("cap-title").textContent = sl.title;
+  document.getElementById("cap-desc").textContent = sl.desc;
+  document.getElementById("page-num").textContent = `${curSlide + 1} / ${sec.slides.length}`;
+  document.getElementById("prev").disabled = curSlide === 0;
+  document.getElementById("next").disabled = curSlide === sec.slides.length - 1;
+  const dots = document.getElementById("dots");
+  dots.innerHTML = sec.slides.map((_, i) =>
+    `<div class="dot ${i === curSlide ? "on" : ""}" data-d="${i}"></div>`).join("");
+  dots.querySelectorAll(".dot").forEach(d => {
+    d.onclick = () => { curSlide = +d.dataset.d; render(); };
+  });
+}
+
+document.getElementById("prev").onclick = () => { if (curSlide > 0) { curSlide--; render(); } };
+document.getElementById("next").onclick = () => {
+  if (curSlide < SECTIONS[curSection].slides.length - 1) { curSlide++; render(); }
+};
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowLeft") document.getElementById("prev").click();
+  if (e.key === "ArrowRight") document.getElementById("next").click();
+});
+
+buildNav();
+render();
+</script>
+</body>
+</html>
